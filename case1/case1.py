@@ -1,6 +1,8 @@
 import fontforge, psMat
 import os
 
+#psMat 튜플 구조: 2x2행렬 기준 좌상/좌하/우상/우하/x병진/y병진
+#글리프 생성: fontforge.fonts()[0].createChar(유니코드, 글리프이름)
 BASEDIR='C:\\FFC\\'
 BASEORDER=ord('가')
 HANGUL_SVG_HEAD=
@@ -18,7 +20,6 @@ MD=('ㅏ', 'ㅐ', 'ㅑ', 'ㅒ', 'ㅓ', 'ㅔ', 'ㅕ', 'ㅖ', 'ㅗ', 'ㅘ',
 ED=( '', 'ㄱ', 'ㄲ', 'ㄳ', 'ㄴ', 'ㄵ', 'ㄶ', 'ㄷ', 'ㄹ', 'ㄺ', 'ㄻ',
       'ㄼ', 'ㄽ', 'ㄾ', 'ㄿ', 'ㅀ', 'ㅁ', 'ㅂ', 'ㅄ', 'ㅅ', 'ㅆ', 'ㅇ',
       'ㅈ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ')
-      #공백 제외
 
 if not os.path.exists(BASEDIR):
     os.makedirs(BASEDIR)
@@ -50,9 +51,12 @@ for h in HD:
     for m in MD:
         top=plusHan(h,m)
         # 모음에 따른 초성 변환
-        # ㅏㅐㅑㅒㅓㅔㅕㅖㅣ형
-        # ㅗㅛㅜㅠㅡ형
-        # ㅘㅙㅚㅝㅞㅟㅢ형
+        if m in 'ㅏㅐㅑㅒㅓㅔㅕㅖㅣ':
+            pass
+        elif m in 'ㅗㅛㅜㅠㅡ':
+            pass
+        elif m in 'ㅘㅙㅚㅝㅞㅟㅢ':
+            pass
         # (추후 수정 가능)
         font[han2GL(h)].export(BASEDIR+h+'.svg')
         hp=getPath(h)
