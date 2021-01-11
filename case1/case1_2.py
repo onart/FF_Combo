@@ -2,26 +2,30 @@ import fontforge, psMat
 
 # 가로/세로 사이즈 840 가량으로 맞춤. 좌측하단이 (0,0)지점
 
-# 미리 지정한 백분율 상수 좌표(백분율: 좌측하단 꼭짓점, 가로, 세로)
+# 미리 지정한 상수 좌표(백분율: 좌측하단 꼭짓점, 가로, 세로)
 # 테스트 결과에 따라 수정 가능
 
 CONS=(
-    (13,35,45,35),  # ㅏㅐㅑㅒㅓㅔㅕㅖㅣ와 자음
-    (25,45,50,35),  # ㅗㅛㅜㅠㅡ와 자음
-    (25,50,35,30),  # ㅘㅙㅚㅝㅞㅟㅢ와 자음
-    )
+    (54.0, 181.0, 555.0, 623.0),  # ㅏㅐㅑㅒㅓㅔㅕㅖㅣ와 자음
+    (166.0, 360.0, 806.0, 723.0),  # ㅗㅛㅜㅠㅡ와 자음
+    (131.0, 330.0, 636.0, 697.0),  # ㅘㅙㅚㅝㅞㅟㅢ와 자음
+)
 VOW=(
-    (64,10,25,80),  # ㅏㅐㅑㅒㅓㅔㅕㅖㅣ와 자음
-    (10,20,80,25),  # ㅗㅛㅜㅠㅡ와 자음
-    (15,10,70,80),  # ㅘㅙㅚㅝㅞㅟㅢ
+    (587.0, -107.0, 986.0, 847.0),  # ㅏㅐㅑㅒㅓㅔㅕㅖㅣ와 자음
+    (48.0, 34.0, 981.0, 321.0),  # ㅗㅛㅜㅠㅡ와 자음
+    (81.0, -110.0, 830.0, 850.0),  # ㅘㅙㅚㅝㅞㅟㅢ
 )
 
 # 모든 받침의 공통 위치, 테스트 결과에 따라 수정 가능
 CONSB=(
-    ()
+    (266,-63,800,240),
 )
 
+BASEB=(
+    (140,280,980,870),
+)
 
+COMPL=(84.0, -113, 989.0, 849.0)
 
 RATIO=8.4
 BASEORDER=ord('가')
@@ -37,20 +41,26 @@ ED=( '', 'ㄱ', 'ㄲ', 'ㄳ', 'ㄴ', 'ㄵ', 'ㄶ', 'ㄷ', 'ㄹ', 'ㄺ', 'ㄻ',
 def plusHan(h,m,e=''):
     return chr(BASEORDER+588*HD.index(h)+28*MD.index(m)+ED.index(e))
 
-def trans(rect1, rect2):
+def transC(rect1, rect2):
+    # rect1을 rect2에 맞게 조정. rect1의 비율을 유지하지 않고 rect2의 비율을 따라감
+    dst=(rect2[2]-rect2[0],rect2[3]-rect2[1])
+    mat=psMat.scale(dst[0]/(rect1[2]-rect1[0]),dst[1]/(rect1[3]-rect1[1]))
+    tr2=psMat.translate(rect2[0]-rect1[0],rect2[1]-rect1[1])
+    mat=psMat.compose(mat,tr2)
+    return mat
+
+def transV(rect1, rect2):
     # rect1을 rect2에 맞게 조정. rect1의 비율을 유지(긴 방향의 중심선 일치)
-    rect2=list(rect2)
-    for i in range(4):
-        rect2[i]*=RATIO
+    dst=(rect2[2]-rect2[0],rect2[3]-rect2[1])
     mat=None
     if rect1[2]-rect1[0]>rect1[3]-rect1[1]:
-        mat=psMat.scale(rect2[2]/(rect1[2]-rect1[0]))
-        tr1=psMat.translate(0,(rect2[2]+rect1[2]-rect2[0])/2)
-        mat=psMat.compose(mat,tr1)
+        mat=psMat.scale(dst[0]/(rect1[2]-rect1[0]))
+        #tr1=psMat.translate(0,(dst[1]+rect1[3]-rect1[1])/2)
+        #mat=psMat.compose(mat,tr1)
     else:
-        mat=psMat.scale(rect2[3]/(rect1[3]-rect1[1]))
-        tr1=psMat.translate((rect2[3]+rect1[3]-rect2[1])/2,0)
-        mat=psMat.compose(mat,tr1)
+        mat=psMat.scale(dst[1]/(rect1[3]-rect1[1]))
+        #tr1=psMat.translate((dst[0]+rect1[2]-rect1[0])/2,0)
+        #mat=psMat.compose(mat,tr1)
     tr2=psMat.translate(rect2[0]-rect1[0],rect2[1]-rect1[1])
     mat=psMat.compose(mat,tr2)
     return mat
@@ -69,7 +79,11 @@ for h in HD:
             ix=1
         else:
             ix=2
-        font[base].addReference(h,trans(headRect,CONS[ix]))
-        font[base].addReference(m,trans(midRect,VOW[ix]))
-        for e in ED:
-            pass
+        font[base].addReference(h,transC(headRect,CONS[ix]))
+        font[base].addReference(m,transV(midRect,VOW[ix]))
+        font[base].transform(transC(font[base].boundingBox(),COMPL))
+        for e in ED[1:]:
+            term=plusHan(h,m,e)
+            edRect=font[e].boundingBox()
+            font[term].addReference(base, transC(COMPL,BASEB[0]))
+            font[term].addReference(e,transC(edRect,CONSB[0]))
