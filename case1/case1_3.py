@@ -95,4 +95,4 @@ for h in HD:
             font[term].addReference(e,transC(STD_C,CONSB[0]))
             font[term].transform(transC(font[term].boundingBox(),COMPL))
 
-# 확인된 문제: ㅘ ㅚ 등 가로+세로 모음 균형이 안 맞음
+# 확인된 문제: addReference에서 transC의 효과가 약간 다름
