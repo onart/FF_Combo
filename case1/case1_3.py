@@ -22,7 +22,8 @@ CONSB=(
 )
 
 BASEB=(
-    (140,240,980,870),
+    (140,240,980,870),  # 일반 글자
+    (140,180,980,870),  # 일반 글자
 )
 
 STD_C=(120,90,820,620)
@@ -91,7 +92,10 @@ for h in HD:
         font[base].transform(transC(font[base].boundingBox(),COMPL))
         for e in ED[1:]:
             term=plusHan(h,m,e)
-            font[term].addReference(base, transC(COMPL,BASEB[0]))
+            if ix<2:
+                font[term].addReference(base, transC(COMPL,BASEB[0]))
+            else:
+                font[term].addReference(base, transC(COMPL,BASEB[1]))
             font[term].addReference(e,transC(STD_C,CONSB[0]))
             font[term].transform(transC(font[term].boundingBox(),COMPL))
 
